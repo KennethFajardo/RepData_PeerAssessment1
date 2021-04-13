@@ -98,8 +98,11 @@ Imputing the data yielded an increase in the middle values of the histogram (10k
 ## Are there differences in activity patterns between weekdays and weekends?
 Create a new factor variable in the dataset with two levels -- "weekday" and "weekend" indicating whether a given date is a weekday or weekend day.
 ```{r weekday, echo=TRUE}
+# Create negated %in% operator
 `%!in%` <- Negate(`%in%`)
+# Create factors
 weekend <- c("Saturday", "Sunday")
+# Add a column for the type of day
 filled$daytype <- factor((weekdays(filled$date) %!in% weekend), 
          levels=c(FALSE, TRUE), labels=c('weekend', 'weekday'))
 head(filled)
@@ -107,8 +110,7 @@ head(filled)
 
 Make a panel plot of the average number of steps taken across weekdays vs weekends.
 ```{r panel_plot, echo=TRUE}
-# Set plot parameters
-par(mfrow = c(1,2))
+library(ggplot2)
 # Compute the mean steps per interval
 mean_steps <- filled %>% group_by(interval, daytype) %>% summarise(mean=mean(steps), daytype=daytype)
 # Plot the time-series graph

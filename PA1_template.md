@@ -123,11 +123,53 @@ Make a histogram of the total number of steps taken each day and Calculate and r
 # Compute the total number of steps per day
 total_steps <- tapply(filled$steps, filled$date, sum)
 # Plot histogram
-hist(total_steps, main="Histogram of the Total Number of Steps per Day")
+hist(total_steps, main="Histogram of the Total Number of Steps per Day (Imputed)")
 ```
 
 ![](PA1_template_files/figure-html/hist_steps2-1.png)<!-- -->
 
-Imputing the data yielded an increase in the middle values of the histogram. The left and right-most parts remain the same.
+Imputing the data yielded an increase in the middle values of the histogram (10k to 15k steps). The left and right-most parts remain the same.
 
 ## Are there differences in activity patterns between weekdays and weekends?
+Create a new factor variable in the dataset with two levels -- "weekday" and "weekend" indicating whether a given date is a weekday or weekend day.
+
+```r
+# Create negated %in% operator
+`%!in%` <- Negate(`%in%`)
+# Create factors
+weekend <- c("Saturday", "Sunday")
+# Add a column for the type of day
+filled$daytype <- factor((weekdays(filled$date) %!in% weekend), 
+         levels=c(FALSE, TRUE), labels=c('weekend', 'weekday'))
+head(filled)
+```
+
+```
+##     steps       date interval daytype
+## 289     0 2012-10-02        0 weekday
+## 290     0 2012-10-02        5 weekday
+## 291     0 2012-10-02       10 weekday
+## 292     0 2012-10-02       15 weekday
+## 293     0 2012-10-02       20 weekday
+## 294     0 2012-10-02       25 weekday
+```
+
+Make a panel plot of the average number of steps taken across weekdays vs weekends.
+
+```r
+library(ggplot2)
+# Compute the mean steps per interval
+mean_steps <- filled %>% group_by(interval, daytype) %>% summarise(mean=mean(steps), daytype=daytype)
+```
+
+```
+## `summarise()` has grouped output by 'interval', 'daytype'. You can override using the `.groups` argument.
+```
+
+```r
+# Plot the time-series graph
+g <- ggplot(mean_steps, aes(interval, mean, col="blue"))
+g + geom_line(show.legend = F) + facet_grid(daytype~.)
+```
+
+![](PA1_template_files/figure-html/panel_plot-1.png)<!-- -->
